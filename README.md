@@ -206,7 +206,7 @@ Runs `chug release` in CI and handles the parts that are easy to get wrong.
 
 Staging a release commit in CI is trickier than it looks. After `chug release` runs, `CHANGELOG.md` has been updated and every file in `changes/` has been deleted. If all change files are removed, `changes/` becomes an empty directory — and empty directories don't exist in git. If there were no pending changes at all, nothing may have been modified. A naive `git add .` or `git add changes/` will fail or produce unexpected results in these cases.
 
-`chug-release` handles all of it: it stages the changelog update, correctly handles deleted change files, avoids committing when nothing changed, and creates a clean local commit that the calling workflow can choose to push.
+`chug-release` handles all of it: it stages the changelog update, correctly handles deleted change files, and creates a clean local commit when the release actually changes repository files. That includes releases that intentionally write a `No changes` section.
 
 ```yaml
 name: Update Changelog

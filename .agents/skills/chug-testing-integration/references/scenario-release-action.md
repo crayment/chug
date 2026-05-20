@@ -56,6 +56,8 @@ jobs:
 - the action outputs indicate whether changes were written and committed
 - the local commit is created inside the workflow when there are staged changes
 - the no-change run completes cleanly
+- if Chug's release model writes a `No changes` version section, then the no-change run should still report `changed=true` and `committed=true`
+- if Chug ever changes to a true no-op release model, update this scenario before treating those outputs as a bug
 
 ## Record
 
