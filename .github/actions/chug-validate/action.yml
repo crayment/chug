@@ -1,0 +1,21 @@
+name: Chug Validate
+description: Ensure a pull request includes at least one change file.
+
+runs:
+  using: composite
+  steps:
+    - name: Check changed files
+      uses: tj-actions/changed-files@v46
+      id: changed_files
+
+    - name: Validate change file present
+      shell: bash
+      run: |
+        for file in ${{ steps.changed_files.outputs.all_changed_files }}; do
+          if [[ "$file" == changes/* ]]; then
+            exit 0
+          fi
+        done
+
+        echo "::error::A changelog entry file in changes/ is required for this pull request."
+        exit 1

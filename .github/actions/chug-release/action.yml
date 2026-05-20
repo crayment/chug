@@ -1,0 +1,84 @@
+name: Chug Release
+description: Run Chug release and optionally create a local git commit.
+
+inputs:
+  version:
+    description: Version string for the release section.
+    required: true
+  github-token:
+    description: Optional GitHub token used for PR enrichment.
+    required: false
+    default: ""
+  commit-changes:
+    description: Whether to create a local git commit after release.
+    required: false
+    default: "false"
+
+outputs:
+  changed:
+    description: Whether the release changed repository files.
+    value: ${{ steps.state.outputs.changed }}
+  committed:
+    description: Whether a local git commit was created.
+    value: ${{ steps.commit.outputs.committed }}
+  commit-sha:
+    description: The SHA of the local commit if one was created.
+    value: ${{ steps.commit.outputs.commit_sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install Chug from action repo
+      shell: bash
+      run: |
+        uv tool install --force "${{ github.action_path }}/../../.."
+
+    - name: Run release
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        chug release --version "${{ inputs.version }}"
+
+    - name: Detect changed files
+      id: state
+      shell: bash
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Commit changelog changes
+      id: commit
+      shell: bash
+      run: |
+        if [ "${{ inputs.commit-changes }}" != "true" ]; then
+          echo "committed=false" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        git add CHANGELOG.md
+        git add -A changes/ || true
+
+        if git diff --cached --quiet; then
+          echo "committed=false" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit -m "Update changelog for ${{ inputs.version }}"
+        echo "committed=true" >> "$GITHUB_OUTPUT"
+        echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

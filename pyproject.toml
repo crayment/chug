@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chug-cli"
+version = "0.1.0"
+description = "Agent-first changelog management for teams"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "click>=8.1.0",
+  "PyYAML>=6.0",
+  "requests>=2.31.0",
+]
+
+[project.scripts]
+chug = "chug.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cli/src/chug"]
+
+[tool.pytest.ini_options]
+testpaths = ["cli/tests"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+]
