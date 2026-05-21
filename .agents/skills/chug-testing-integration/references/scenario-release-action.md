@@ -13,8 +13,9 @@ Prove that the public release action can:
 
 ## Steps
 
-1. Work in `/Users/crayment/dev/me/chug-testing`
-2. Ensure the repo has a workflow that uses:
+1. Resolve `PRODUCT_REPO_DIR` and `CONSUMER_REPO_DIR` using `repository-discovery.md`
+2. Work in `CONSUMER_REPO_DIR`
+3. Ensure the repo has a workflow that uses:
 
 ```yaml
 name: Update Changelog
@@ -44,11 +45,11 @@ jobs:
           commit-changes: true
 ```
 
-3. Ensure there is at least one pending `changes/*.yml` file on `main`
-4. Trigger the workflow with `gh workflow run`
-5. Wait for completion with `gh run watch`
-6. Inspect logs and resulting commit state
-7. Repeat with no pending changes to validate the no-change path
+4. Ensure there is at least one pending `changes/*.yml` file on `main`
+5. Trigger the workflow with `gh workflow run`
+6. Wait for completion with `gh run watch`
+7. Inspect logs and resulting commit state
+8. Repeat with no pending changes to validate the no-change path
 
 ## Expected Result
 
@@ -61,6 +62,8 @@ jobs:
 
 ## Record
 
+- `PRODUCT_REPO_DIR`
+- `CONSUMER_REPO_DIR`
 - workflow run URL
 - whether `changed` was true or false
 - whether `committed` was true or false

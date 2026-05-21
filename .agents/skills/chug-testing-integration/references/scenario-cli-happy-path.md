@@ -8,15 +8,16 @@ Prove that a team can use Chug locally in a normal repository from init through 
 
 ## Steps
 
-1. Work in `/Users/crayment/dev/me/chug-testing`
-2. Ensure `main` is clean before starting
-3. Install the current local product build:
+1. Resolve `PRODUCT_REPO_DIR` and `CONSUMER_REPO_DIR` using `repository-discovery.md`
+2. Work in `CONSUMER_REPO_DIR`
+3. Ensure `main` is clean before starting
+4. Install the current local product build:
 
 ```bash
-uv tool install --force --refresh "/Users/crayment/dev/me/chug"
+uv tool install --force --refresh "$PRODUCT_REPO_DIR"
 ```
 
-4. Run:
+5. Run:
 
 ```bash
 chug init
@@ -25,8 +26,8 @@ chug preview
 chug release --version 0.9.0-cli-test
 ```
 
-5. Inspect `CHANGELOG.md`
-6. Verify `changes/` no longer contains the processed file
+6. Inspect `CHANGELOG.md`
+7. Verify `changes/` no longer contains the processed file
 
 ## Expected Result
 
@@ -37,6 +38,8 @@ chug release --version 0.9.0-cli-test
 
 ## Record
 
+- `PRODUCT_REPO_DIR`
+- `CONSUMER_REPO_DIR`
 - resulting `CHANGELOG.md` diff
 - release command output
 - any formatting surprises

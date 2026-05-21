@@ -4,8 +4,12 @@ Use this reference before running any scenario.
 
 ## Local Repositories
 
-- Product repo: `/Users/crayment/dev/me/chug`
-- Consumer repo: `/Users/crayment/dev/me/chug-testing`
+Resolve local clone paths using [repository-discovery.md](./repository-discovery.md).
+
+Record the result as:
+
+- `PRODUCT_REPO_DIR`
+- `CONSUMER_REPO_DIR`
 
 ## Public Repositories
 
@@ -39,5 +43,5 @@ Use this reference before running any scenario.
 ## Cleanup Rules
 
 - Delete short-lived branches after merge or close when safe
-- Leave a clean `main` branch in `chug-testing`
+- Leave a clean `main` branch in the resolved consumer repo
 - Keep useful workflow files and fixtures if they support future scenarios
