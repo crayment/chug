@@ -81,6 +81,7 @@ jobs:
           uvx twine check dist/*
 
       - name: Create local release commit and tag
+        if: env.PUBLISH_TARGET == 'pypi'
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -106,12 +107,14 @@ jobs:
           uv publish dist/*
 
       - name: Push release commit
+        if: env.PUBLISH_TARGET == 'pypi'
         shell: bash
         run: |
           git push
           git push origin "${VERSION}"
 
       - name: Create GitHub release
+        if: env.PUBLISH_TARGET == 'pypi'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
