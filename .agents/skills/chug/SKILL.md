@@ -1,6 +1,6 @@
 ---
 name: chug
-description: Use the Chug CLI to manage changelog entries through small files. Load this skill when a repo uses Chug, has a chug.config.yml file, or needs a changelog entry created, previewed, or released.
+description: Create a changelog entry with Chug when preparing a pull request or when asked to add a changelog entry. Load this skill when you need to run `chug new` to generate the change file for a code change.
 tags:
   - chug
   - changelog
@@ -11,18 +11,18 @@ author: Claude
 
 # Chug
 
-Use Chug to manage changelog work through small files in `changes/` instead of editing `CHANGELOG.md` directly.
+Use Chug to create the pending changelog file for a code change before opening a pull request or when explicitly asked to add a changelog entry.
 
 ## Quick Start
 
-1. Check whether the `chug` command is installed
-2. Install it if missing
-3. Read `chug.config.yml` before creating or releasing entries
-4. Use `chug new`, `chug preview`, and `chug release` instead of editing `CHANGELOG.md` directly
+1. Check whether `chug` is installed by running `chug --help`
+2. Install `chug` if the command is missing
+3. Read `chug.config.yml` before creating the entry
+4. Run `chug new` with a user-facing description and a configured category
 
 ## Install
 
-If `chug` is missing, install it with one of:
+If `chug --help` fails because the command is missing, install it with one of:
 
 ```bash
 uv tool install chug-cli
@@ -30,12 +30,6 @@ uv tool install chug-cli
 
 ```bash
 pipx install chug-cli
-```
-
-If working from a local source checkout of Chug, install from the repo root instead:
-
-```bash
-uv tool install .
 ```
 
 ## Use
@@ -47,30 +41,18 @@ Pay attention to:
 - `categories` — use only configured categories
 - `story_format`
 - `story_link_template`
-- `git_base_branch`
 - `changelog_style` if present — follow it when writing descriptions
 
-Use these commands:
-
-```bash
-chug init
-```
+Create the changelog entry with:
 
 ```bash
 chug new --description "Describe the user-visible change" --category feature
 ```
 
-```bash
-chug preview
-```
-
-```bash
-chug release --version 1.2.3
-```
-
 ## Key Reminders
 
-- Prefer creating a change file over editing `CHANGELOG.md` directly
+- Create a change file instead of editing `CHANGELOG.md` directly
 - Keep descriptions concise and user-facing
+- Use a category that actually appears in `chug.config.yml`
+- Follow `changelog_style` if the repo defines it
 - If author detection fails, Chug writes `authors: []`; do not block on missing git author config
-- `chug release` deletes processed change files after writing the changelog section
