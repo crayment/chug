@@ -1,6 +1,6 @@
 ---
 name: chug
-description: Create a changelog entry with Chug when preparing a pull request or when asked to add a changelog entry. Load this skill when you need to run `chug new` to generate the change file for a code change.
+description: Create a changelog entry with Chug when preparing a pull request or when asked to create a changelog or add a changelog. Trigger phrases include `chug`, `create a changelog`, and `add a changelog`. Load this skill when you need to run `chug new` to generate the change file for a code change.
 tags:
   - chug
   - changelog
