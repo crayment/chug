@@ -90,6 +90,13 @@ jobs:
           git commit -m "Release ${VERSION}"
           git tag -a "${VERSION}" -m "Release ${VERSION}"
 
+      - name: Embed build commit metadata
+        shell: bash
+        run: |
+          printf '%s\n' '# ABOUTME: Build metadata for the published Chug package.' > cli/src/chug/_build.py
+          printf '%s\n' '# ABOUTME: The release process may overwrite this file to embed a commit hash in artifacts.' >> cli/src/chug/_build.py
+          printf '\n__commit__ = "%s"\n' "$(git rev-parse --short HEAD)" >> cli/src/chug/_build.py
+
       - name: Publish to TestPyPI
         if: env.PUBLISH_TARGET == 'testpypi'
         env:

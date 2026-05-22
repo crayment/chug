@@ -2,15 +2,89 @@
 # ABOUTME: The CLI is non-interactive by default and operates on the current repository.
 
 from pathlib import Path
+import json
+import subprocess
+from urllib.parse import unquote, urlparse
+import importlib.metadata
 
 import click
 
+from . import __commit__, __version__
 from .change import create_change_file
 from .config import DEFAULT_CHANGE_MARKER, DEFAULT_CHANGELOG_FILE, changes_dir, load_config, write_default_config
 from .release import apply_release, preview_markdown
 
 
-@click.group()
+def get_commit() -> str:
+    if __commit__ != "unknown":
+        return __commit__
+
+    repo_dir = get_source_repository_dir()
+    if repo_dir is not None:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=repo_dir,
+        )
+        commit = result.stdout.strip()
+        if commit:
+            return commit
+
+    result = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=Path(__file__).resolve().parent,
+    )
+    commit = result.stdout.strip()
+    return commit or __commit__
+
+
+def get_source_repository_dir() -> Path | None:
+    try:
+        distribution = importlib.metadata.distribution("chug-cli")
+        direct_url = distribution.read_text("direct_url.json")
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+    if not direct_url:
+        return None
+
+    data = json.loads(direct_url)
+    url = data.get("url")
+    if not url:
+        return None
+
+    parsed_url = urlparse(url)
+    if parsed_url.scheme != "file":
+        return None
+
+    return Path(unquote(parsed_url.path))
+
+
+def get_version_output(prog_name: str = "chug") -> str:
+    return f"{prog_name}, version {__version__} ({get_commit()})"
+
+
+def show_version(ctx: click.Context, param: click.Option, value: bool) -> None:
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(get_version_output(ctx.command_path))
+    ctx.exit()
+
+
+@click.group(name="chug")
+@click.option(
+    "--version",
+    is_flag=True,
+    is_eager=True,
+    expose_value=False,
+    callback=show_version,
+    help="Show the installed Chug version and commit.",
+)
 def cli() -> None:
     """Manage a team changelog through small change files."""
 
