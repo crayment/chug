@@ -4,7 +4,6 @@
 from pathlib import Path
 
 import yaml
-
 from chug.config import DEFAULT_CONFIG, changes_dir
 from chug.release import preview_markdown
 

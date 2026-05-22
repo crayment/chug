@@ -3,17 +3,16 @@
 
 from __future__ import annotations
 
-from datetime import date
 import logging
 import os
-from pathlib import Path
 import subprocess
+from datetime import date
+from pathlib import Path
 
 import requests
 
 from .change import load_change_files
 from .config import changelog_path
-
 
 logger = logging.getLogger(__name__)
 

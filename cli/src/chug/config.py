@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-
 CONFIG_FILE_NAME = "chug.config.yml"
 DEFAULT_CHANGELOG_FILE = "CHANGELOG.md"
 DEFAULT_CHANGE_MARKER = "<!-- #changelog-release-automation-hook-do-not-remove -->"
