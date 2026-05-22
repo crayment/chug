@@ -1,0 +1,5 @@
+description: Dogfood Chug validation and test workflows in pull requests
+category: chore
+authors:
+- name: Cody Rayment
+  github: crayment
