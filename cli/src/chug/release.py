@@ -120,7 +120,9 @@ def _format_pr_links(entry: dict) -> list[str]:
     return [f"[#{number}](https://github.com/{repository}/pull/{number})" for number in pr_numbers]
 
 
-def _enrich_entries_with_pr_links(entries_with_paths: list[tuple[Path, dict]], entries: list[dict], config: dict) -> None:
+def _enrich_entries_with_pr_links(
+    entries_with_paths: list[tuple[Path, dict]], entries: list[dict], config: dict
+) -> None:
     token = os.environ.get("GITHUB_TOKEN")
     repository = os.environ.get("GITHUB_REPOSITORY")
     if not token:

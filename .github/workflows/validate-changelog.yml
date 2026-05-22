@@ -1,4 +1,4 @@
-name: Validate Changelog Entry
+name: Changelog
 
 on:
   pull_request:

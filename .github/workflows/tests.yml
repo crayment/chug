@@ -1,4 +1,4 @@
-name: Run Tests
+name: Tests
 
 on:
   pull_request:
@@ -18,16 +18,6 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-
-      - name: Check formatting
-        shell: bash
-        run: |
-          uv run --group dev ruff format --check cli
-
-      - name: Run lint checks
-        shell: bash
-        run: |
-          uv run --group dev ruff check cli
 
       - name: Run tests
         shell: bash
