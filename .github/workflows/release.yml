@@ -66,9 +66,13 @@ jobs:
 
       - name: Update changelog with Chug
         if: env.PUBLISH_TARGET == 'pypi'
-        shell: bash
-        run: |
-          uv run chug release --version "${VERSION}"
+        # Third-party repos would reference the published action, for example:
+        # uses: crayment/chug/.github/actions/chug-release@v1
+        uses: ./.github/actions/chug-release
+        with:
+          version: ${{ inputs.version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-changes: false
 
       - name: Run tests
         shell: bash
