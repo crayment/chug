@@ -1,11 +1,7 @@
 # ABOUTME: Command-line interface for Chug's init, new, preview, and release workflow.
 # ABOUTME: The CLI is non-interactive by default and operates on the current repository.
 
-import importlib.metadata
-import json
-import subprocess
 from pathlib import Path
-from urllib.parse import unquote, urlparse
 
 import click
 
@@ -15,58 +11,8 @@ from .config import DEFAULT_CHANGE_MARKER, DEFAULT_CHANGELOG_FILE, changes_dir, 
 from .release import apply_release, preview_markdown
 
 
-def get_commit() -> str:
-    if __commit__ != "unknown":
-        return __commit__
-
-    repo_dir = get_source_repository_dir()
-    if repo_dir is not None:
-        result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
-            check=False,
-            capture_output=True,
-            text=True,
-            cwd=repo_dir,
-        )
-        commit = result.stdout.strip()
-        if commit:
-            return commit
-
-    result = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"],
-        check=False,
-        capture_output=True,
-        text=True,
-        cwd=Path(__file__).resolve().parent,
-    )
-    commit = result.stdout.strip()
-    return commit or __commit__
-
-
-def get_source_repository_dir() -> Path | None:
-    try:
-        distribution = importlib.metadata.distribution("chug-cli")
-        direct_url = distribution.read_text("direct_url.json")
-    except importlib.metadata.PackageNotFoundError:
-        return None
-
-    if not direct_url:
-        return None
-
-    data = json.loads(direct_url)
-    url = data.get("url")
-    if not url:
-        return None
-
-    parsed_url = urlparse(url)
-    if parsed_url.scheme != "file":
-        return None
-
-    return Path(unquote(parsed_url.path))
-
-
 def get_version_output(prog_name: str = "chug") -> str:
-    return f"{prog_name}, version {__version__} ({get_commit()})"
+    return f"{prog_name}, version {__version__} ({__commit__})"
 
 
 def show_version(ctx: click.Context, param: click.Option, value: bool) -> None:
