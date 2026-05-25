@@ -1,0 +1,41 @@
+# ABOUTME: Root composite action — installs the Chug CLI from PyPI or the action repo.
+# ABOUTME: Public surface: uses: crayment/chug@v1
+
+name: Setup Chug
+description: Install the Chug CLI from PyPI or the action repo.
+
+inputs:
+  version:
+    description: PyPI version to install. Ignored when source is 'repo'.
+    required: false
+    default: "latest"
+  source:
+    description: Where to install chug from — 'pypi' or 'repo'.
+    required: false
+    default: "pypi"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install Chug from PyPI
+      if: ${{ inputs.source == 'pypi' && inputs.version == 'latest' }}
+      shell: bash
+      run: uv tool install chug-cli
+
+    - name: Install Chug from PyPI (pinned version)
+      if: ${{ inputs.source == 'pypi' && inputs.version != 'latest' }}
+      shell: bash
+      run: uv tool install chug-cli==${{ inputs.version }}
+
+    - name: Install Chug from repo
+      if: ${{ inputs.source == 'repo' }}
+      shell: bash
+      run: uv tool install --force "${{ github.action_path }}"

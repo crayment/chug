@@ -1,3 +1,6 @@
+# ABOUTME: Workflow that validates each PR includes a Chug change file.
+# ABOUTME: Runs chug validate using the CLI installed from the current branch.
+
 name: Changelog
 
 on:
@@ -18,7 +21,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Chug
+        uses: ./
+        with:
+          source: repo
+
       - name: Validate changelog entry
-        # Third-party repos should reference the published action, for example:
-        # uses: crayment/chug/.github/actions/chug-validate@v1
-        uses: ./.github/actions/chug-validate
+        shell: bash
+        run: chug validate
