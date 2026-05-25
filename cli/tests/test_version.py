@@ -1,10 +1,9 @@
 # ABOUTME: Tests for the CLI version output.
 # ABOUTME: Verifies Chug reports the package version and commit hash.
 
-from click.testing import CliRunner
-
 import chug.cli
 from chug.cli import cli
+from click.testing import CliRunner
 
 
 def test_version_output_includes_version_and_commit(monkeypatch) -> None:

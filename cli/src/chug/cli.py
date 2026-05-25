@@ -1,11 +1,11 @@
 # ABOUTME: Command-line interface for Chug's init, new, preview, and release workflow.
 # ABOUTME: The CLI is non-interactive by default and operates on the current repository.
 
-from pathlib import Path
+import importlib.metadata
 import json
 import subprocess
+from pathlib import Path
 from urllib.parse import unquote, urlparse
-import importlib.metadata
 
 import click
 
