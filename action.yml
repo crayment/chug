@@ -33,7 +33,9 @@ runs:
     - name: Install Chug from PyPI (pinned version)
       if: ${{ inputs.source == 'pypi' && inputs.version != 'latest' }}
       shell: bash
-      run: uv tool install chug-cli==${{ inputs.version }}
+      env:
+        CHUG_VERSION: ${{ inputs.version }}
+      run: uv tool install chug-cli==$CHUG_VERSION
 
     - name: Install Chug from repo
       if: ${{ inputs.source == 'repo' }}

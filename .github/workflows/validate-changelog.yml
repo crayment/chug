@@ -22,6 +22,8 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Chug
+        # Third-party repos should reference the published action, for example:
+        # uses: crayment/chug@v1
         uses: ./
         with:
           source: repo
