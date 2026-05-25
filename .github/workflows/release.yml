@@ -70,7 +70,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: chug release --version "${{ inputs.version }}"
+        run: chug release --version "$VERSION"
 
       - name: Create local release commit and tag
         shell: bash
