@@ -1,4 +1,4 @@
-# ABOUTME: Command-line interface for Chug's init, new, preview, and release workflow.
+# ABOUTME: Command-line interface for Chug's init, new, preview, release, and validate workflow.
 # ABOUTME: The CLI is non-interactive by default and operates on the current repository.
 
 from pathlib import Path
@@ -6,6 +6,14 @@ from pathlib import Path
 import click
 
 from . import __commit__, __version__
+from ._validate import (
+    CI_ERROR_MESSAGE,
+    LOCAL_ERROR_MESSAGE,
+    get_base_branch,
+    get_changed_files,
+    has_changes_entry,
+    is_ci,
+)
 from .change import create_change_file
 from .config import DEFAULT_CHANGE_MARKER, DEFAULT_CHANGELOG_FILE, changes_dir, load_config, write_default_config
 from .release import apply_release, preview_markdown
@@ -82,6 +90,28 @@ def release(version: str) -> None:
     config = load_config()
     processed = apply_release(version, config)
     click.echo(f"Released {processed} changelog entr{'y' if processed == 1 else 'ies'}.")
+
+
+@cli.command()
+def validate() -> None:
+    """Check that a changelog entry exists for the current pull request."""
+    config = load_config()
+
+    base_branch = get_base_branch(config)
+
+    try:
+        changed_files = get_changed_files(base_branch)
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if has_changes_entry(changed_files):
+        return
+
+    if is_ci():
+        click.echo(CI_ERROR_MESSAGE)
+        raise SystemExit(1)
+    else:
+        raise click.ClickException(LOCAL_ERROR_MESSAGE)
 
 
 def main() -> None:

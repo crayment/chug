@@ -33,7 +33,7 @@ At release time, one command rolls all pending files into a new versioned sectio
 Chug ships three things to make this work end-to-end:
 
 - **A CLI** for creating change YAML files. Automatically pulls author info from your git config and validates that the change is categorized into one of your configured categories.
-- **Two GitHub Actions** — one to validate that every PR includes a change file, one to process a release (create an entry in `CHANGELOG.md` from your change files, delete them, and commit everything).
+- **A GitHub Action** that installs the `chug` CLI in CI. Use it in validate and release workflows via shell steps.
 - **An agent skill** so agents know to create a change file when they open a PR.
 
 That's it. Chug is deliberately small. It's not a release platform or a versioning system — just a better way to maintain your changelog.
@@ -179,11 +179,15 @@ Chug finds the most recent base-branch commit that touched the change file, look
 
 ## GitHub Actions
 
-Two companion actions for teams that want changelog hygiene enforced in CI.
+A single setup action installs the `chug` CLI in your workflow. Then call CLI commands in shell steps.
 
-### `chug-validate`
+```yaml
+- uses: crayment/chug@v1
+```
 
-Fails a pull request if no file in `changes/` was added or modified. Use this to make a changelog entry a required part of every PR.
+### Validate workflow
+
+`chug validate` checks that the current PR added or modified a file in `changes/`. It diffs against the base branch using `GITHUB_BASE_REF` in CI, or falls back to `git_base_branch` from your config when run locally. On failure in CI, it emits a GitHub Actions error annotation.
 
 ```yaml
 name: Validate Changelog Entry
@@ -202,12 +206,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: crayment/chug/.github/actions/chug-validate@v1
+      - uses: crayment/chug@v1
+      - run: chug validate
 ```
 
-### `chug-release`
+### Release workflow
 
-Runs `chug release` in CI and handles the edge cases that are easy to get wrong — deleted change files, an empty `changes/` directory after processing, and releases that write a `No changes` section. Stages a clean commit when the release actually modifies files.
+`chug release` writes the versioned changelog section and deletes the processed change files. Committing and pushing is left to the workflow.
 
 ```yaml
 name: Update Changelog
@@ -229,38 +234,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - uses: crayment/chug/.github/actions/chug-release@v1
-        id: release
-        with:
-          version: ${{ inputs.version }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          commit-changes: true
-
-      - name: Push changelog commit
-        if: steps.release.outputs.committed == 'true'
-        run: git push
+      - uses: crayment/chug@v1
+      - run: chug release --version ${{ inputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit and push changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git add -A changes/ || true
+          git diff --cached --quiet || git commit -m "Update changelog for ${{ inputs.version }}"
+          git push
 ```
-
-These actions are hosted in `crayment/chug` and can be referenced directly by tag from any repository. No special read token required.
 
 Push is left to the calling workflow intentionally — whether it succeeds depends on your branch protection rules and token permissions.
 
-**Inputs:**
+### Setup action inputs
 
-| Input | Required | Description |
-|---|---|---|
-| `version` | Yes | Version string for the release section |
-| `github-token` | No | Enables PR link enrichment |
-| `commit-changes` | No | Create a local git commit after release (default: `false`) |
-
-**Outputs:**
-
-| Output | Description |
+| Input | Description |
 |---|---|
-| `changed` | Whether any changelog changes were written |
-| `committed` | Whether a local commit was created |
-| `commit-sha` | The SHA of the commit, if one was created |
+| `version` | Version of the `chug` CLI to install. Defaults to the latest release. |
+| `source` | Where to install from. Defaults to PyPI. Primarily used for pre-release testing. |
 
 ---
 
