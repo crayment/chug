@@ -64,6 +64,11 @@ jobs:
         with:
           source: repo
 
+      - name: Run tests
+        shell: bash
+        run: |
+          uv run --group dev pytest
+
       - name: Run chug release
         shell: bash
         env:
