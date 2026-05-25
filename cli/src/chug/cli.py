@@ -97,11 +97,12 @@ def init() -> None:
 
     changelog = Path(DEFAULT_CHANGELOG_FILE)
     if not changelog.exists():
-        changelog.write_text(
+        initial_changelog = (
             "# Changelog\n\n"
             "All notable changes to this project will be documented in this file.\n\n"
             f"{DEFAULT_CHANGE_MARKER}\n"
         )
+        changelog.write_text(initial_changelog)
 
     click.echo("Initialized Chug in the current repository.")
 

@@ -1,29 +1,25 @@
 # Chug
 
-**Changelog management that works for teams and agents.**
-
-Chug solves a deceptively annoying problem: keeping `CHANGELOG.md` up to date on a team without merge conflicts, inconsistent formatting, or deferred release notes.
-
-The approach is borrowed from database migrations. Instead of editing `CHANGELOG.md` directly on every branch, each change gets captured in a small YAML file first. Those files accumulate while work is in progress. At release time, Chug rolls them into a new versioned section and deletes them. No conflicts. No ceremony. No special release platform required.
+Keeping `CHANGELOG.md` tidy on a team is one of those things that's never quite as simple as it should be. Chug is a small tool I built to take the friction out of it. It works well for me, so I'm sharing it.
 
 ---
 
-## The Problem
+## The Problems
 
-On a team, `CHANGELOG.md` is nobody's job and everyone's problem.
+**Parallel branches create merge conflicts.**
+Every PR that edits `CHANGELOG.md` touches the same file at the same position. On an active team this produces conflicts regularly.
 
-Editing it directly means:
+**Release mechanics are manual.**
+The typical pattern is an "Unreleased" section at the top that accumulates changes and gets renamed to a version when you ship. It works, but it's a manual step that's easy to skip or do inconsistently.
 
-- **Merge conflicts.** Every branch touches the same file at the top.
-- **Inconsistent output.** Each contributor has a different idea of what belongs there.
-- **Deferred work.** Changelog updates get skipped and batched later, when context is gone.
-- **Agent friction.** Automated workflows that touch `CHANGELOG.md` need to parse, merge, and reformat it — fragile work that breaks silently.
-
-Chug replaces all of that with a structured, automatable, merge-conflict-free workflow.
+**Agents don't know the rules.**
+When you ask an agent to open a pull request, it has no idea a changelog entry is expected. It ships the PR without one unless it's been explicitly taught otherwise.
 
 ---
 
-## How It Works
+## How Chug Fixes It
+
+Instead of editing `CHANGELOG.md` directly, each change gets written as a small YAML file in a `changes/` directory. Branches create new files — they don't edit existing ones. New files never conflict with each other.
 
 ```
 changes/
@@ -32,15 +28,15 @@ changes/
   2024-01-17T162801-update-rate-limits.yml
 ```
 
-Each change is a small YAML file in a `changes/` directory. Branches create files, not edits. Files don't conflict with each other.
+At release time, one command rolls all pending files into a new versioned section in `CHANGELOG.md` and deletes them.
 
-At release time:
+Chug ships three things to make this work end-to-end:
 
-```bash
-chug release --version 1.4.0
-```
+- **A CLI** for creating change YAML files. Automatically pulls author info from your git config and validates that the change is categorized into one of your configured categories.
+- **Two GitHub Actions** — one to validate that every PR includes a change file, one to process a release (create an entry in `CHANGELOG.md` from your change files, delete them, and commit everything).
+- **An agent skill** so agents know to create a change file when they open a PR.
 
-Chug reads every pending file, groups entries by category, inserts a new version section into `CHANGELOG.md` at the configured marker, and deletes the processed files. The changelog grows forward; the pending files stay small and clean.
+That's it. Chug is deliberately small. It's not a release platform or a versioning system — just a better way to maintain your changelog.
 
 ---
 
@@ -54,21 +50,13 @@ uv tool install chug-cli
 pipx install chug-cli
 ```
 
-Install from source while developing:
-
-```bash
-uv tool install .
-# or
-pipx install .
-```
-
 **Bootstrap a repo:**
 
 ```bash
 chug init
 ```
 
-This creates `chug.config.yml`, a `changes/` directory, and a `CHANGELOG.md` with an insertion marker — without touching anything that already exists.
+Creates `chug.config.yml`, a `changes/` directory, and a `CHANGELOG.md` with an insertion marker — without touching anything that already exists.
 
 **Record a change:**
 
@@ -76,15 +64,15 @@ This creates `chug.config.yml`, a `changes/` directory, and a `CHANGELOG.md` wit
 chug new --description "Fix session timeout on mobile" --category bug
 ```
 
-This writes a timestamped YAML file into `changes/`. No edits to `CHANGELOG.md`. No coordination required.
+Writes a timestamped YAML file into `changes/`. No edit to `CHANGELOG.md`. No coordination required. Safe to run on any branch.
 
-**Preview pending release notes:**
+**Preview before releasing:**
 
 ```bash
 chug preview
 ```
 
-Renders the full release output without touching any files. Use this to review before cutting a release.
+Renders the full release output without touching any files.
 
 **Cut a release:**
 
@@ -92,13 +80,11 @@ Renders the full release output without touching any files. Use this to review b
 chug release --version 1.4.0
 ```
 
-Inserts a new version section into `CHANGELOG.md` at the configured marker, then deletes the processed change files.
+Inserts a new versioned section at the configured marker in `CHANGELOG.md`, then deletes the processed change files.
 
 ---
 
 ## Change File Format
-
-Every change file looks like this:
 
 ```yaml
 description: Fix session timeout on mobile
@@ -110,13 +96,41 @@ authors:
     github: janedoe
 ```
 
-`description` and `category` are required. `stories` and `authors` are optional. Chug will attempt to populate `authors` from your local git config, and if it cannot determine author info it writes `authors: []` rather than failing.
+`description` and `category` are required. `stories` and `authors` are optional. Chug populates `authors` from your local git config when it can; if it can't, it writes `authors: []` rather than failing.
+
+---
+
+## Author Detection
+
+When you run `chug new`, Chug automatically populates the `authors` field by reading two git config values:
+
+- `user.name` — your display name
+- `github.user` — your GitHub username
+
+If both are set, the entry looks like:
+
+```yaml
+authors:
+  - name: Jane Doe
+    github: janedoe
+```
+
+If neither is set, `authors` is written as an empty list and Chug continues without failing.
+
+**To set these up:**
+
+```bash
+git config --global user.name "Jane Doe"
+git config --global github.user janedoe
+```
+
+`user.name` is typically set already. `github.user` is not a standard git config key — you need to add it explicitly if you want GitHub usernames in your changelog entries.
 
 ---
 
 ## Configuration
 
-`chug.config.yml` controls categories, changelog file path, story link formatting, and more:
+`chug.config.yml` lives at the repo root:
 
 ```yaml
 changelog_file: CHANGELOG.md
@@ -131,54 +145,45 @@ git_base_branch: main
 
 ### `changelog_style` — guidance for agents
 
-You can optionally add a `changelog_style` field to document how your team wants changelog entries written. This is intended as structured guidance for future agent integrations and custom agent workflows.
+An optional field that documents how your team wants entries written. It has no effect on CLI behavior — it exists as structured guidance for agents and automation that create change files on your behalf.
 
 ```yaml
 changelog_style: |
   Write descriptions from the user's perspective, not the implementer's.
   Be specific about what changed and why it matters.
-  Avoid technical jargon unless it's the only precise term.
   Keep descriptions under 100 characters.
   Good: "Fix crash when opening documents with special characters in the filename"
   Avoid: "Handle edge case in path parsing logic"
 ```
 
-This field has no effect on CLI behavior. Treat it as repository guidance for agents and automation, not as required configuration.
-
 ---
 
-## GitHub PR Links (Optional)
+## GitHub PR Links
 
-If you provide a GitHub token, Chug enriches each changelog entry with a link to the pull request that introduced the change file:
+With a GitHub token, Chug enriches each changelog entry with a link to the pull request that introduced the change file:
 
 ```markdown
 - Fix session timeout on mobile ([#87](https://github.com/owner/repo/pull/87), [Jane Doe](https://github.com/janedoe))
 ```
 
-Without a token, Chug still works — entries render without PR links.
-
-**How enrichment works:**
-
-1. Chug finds the most recent commit on your base branch that touched the change file.
-2. It looks up any pull requests associated with that commit.
-3. PR links are added to the rendered entry.
-
-All API calls are read-only. Chug never writes to GitHub.
+Without a token, entries render without PR links and everything else works the same.
 
 ```bash
 export GITHUB_TOKEN=ghp_...
 chug release --version 1.4.0
 ```
 
+Chug finds the most recent base-branch commit that touched the change file, looks up associated pull requests, and adds the link. All API calls are read-only.
+
 ---
 
 ## GitHub Actions
 
-Chug ships two companion GitHub Actions for teams that want changelog hygiene enforced in CI.
+Two companion actions for teams that want changelog hygiene enforced in CI.
 
 ### `chug-validate`
 
-Fails a pull request if no file in `changes/` was added or modified. Use this to make changelog entries a required part of every PR.
+Fails a pull request if no file in `changes/` was added or modified. Use this to make a changelog entry a required part of every PR.
 
 ```yaml
 name: Validate Changelog Entry
@@ -202,11 +207,7 @@ jobs:
 
 ### `chug-release`
 
-Runs `chug release` in CI and handles the parts that are easy to get wrong.
-
-Staging a release commit in CI is trickier than it looks. After `chug release` runs, `CHANGELOG.md` has been updated and every file in `changes/` has been deleted. If all change files are removed, `changes/` becomes an empty directory — and empty directories don't exist in git. If there were no pending changes at all, nothing may have been modified. A naive `git add .` or `git add changes/` will fail or produce unexpected results in these cases.
-
-`chug-release` handles all of it: it stages the changelog update, correctly handles deleted change files, and creates a clean local commit when the release actually changes repository files. That includes releases that intentionally write a `No changes` section.
+Runs `chug release` in CI and handles the edge cases that are easy to get wrong — deleted change files, an empty `changes/` directory after processing, and releases that write a `No changes` section. Stages a clean commit when the release actually modifies files.
 
 ```yaml
 name: Update Changelog
@@ -241,9 +242,9 @@ jobs:
         run: git push
 ```
 
-These actions are public actions hosted in `crayment/chug`, so other repositories can reference them directly by tag. No special read token is required to fetch the action code.
+These actions are hosted in `crayment/chug` and can be referenced directly by tag from any repository. No special read token required.
 
-Push is left to the calling workflow intentionally. Whether `git push` succeeds depends on branch protection rules, rulesets, and token permissions in the calling repository.
+Push is left to the calling workflow intentionally — whether it succeeds depends on your branch protection rules and token permissions.
 
 **Inputs:**
 
@@ -265,35 +266,13 @@ Push is left to the calling workflow intentionally. Whether `git push` succeeds 
 
 ## Agent Skill
 
-Chug is designed to pair well with agent skills. A companion skill can teach agents how to use the Chug CLI, what makes a good changelog entry, and how to read repository guidance like `changelog_style`.
-
-**Install the Chug skill:**
+Chug ships a companion skill that teaches agents how to use the CLI, what makes a good changelog entry, and how to apply your project's `changelog_style` guidance. Once installed, agents working in your repository create change files instead of editing `CHANGELOG.md` directly.
 
 ```bash
 npx skills add crayment/chug
 ```
 
-Once installed, agents working in your repository can create change files instead of editing `CHANGELOG.md` directly and can apply your project's `changelog_style` guidance when writing descriptions.
-
-**Want different defaults?** The skill is a single `SKILL.md` file. Copy it, adjust the entry-writing guidelines to match your team's voice, and host it in your own repository. Point your agents there instead.
-
----
-
-## Why Small Files Instead of Direct Edits
-
-The key insight is that merge conflicts in `CHANGELOG.md` are a structural problem, not a discipline problem. When every branch edits the same file at the same position, conflicts are guaranteed regardless of how careful everyone is.
-
-Change files don't conflict because each one is a new file with a unique name. Branches create, not edit. Conflicts disappear.
-
-The workflow also fits naturally into agent-assisted development. Agents that open pull requests can call `chug new` as a deterministic, non-interactive step. No parsing. No reformatting. Just a structured file that accumulates with everything else.
-
----
-
-## Design Philosophy
-
-Chug is deliberately small. It is not a release platform, a versioning system, or a CI framework. It solves one problem: maintaining a useful `CHANGELOG.md` through structured change files instead of direct edits.
-
-Non-interactive by default. Structured output. Graceful degradation when context is missing. Designed for humans and agents to use the same way.
+The skill is a single `SKILL.md` file. Copy it, adjust the guidelines to match your team's voice, and host it wherever you want.
 
 ---
 

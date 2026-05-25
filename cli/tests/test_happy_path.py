@@ -3,12 +3,10 @@
 
 from pathlib import Path
 
-import yaml
-from click.testing import CliRunner
-
-from chug.cli import cli
 import chug.change
-
+import yaml
+from chug.cli import cli
+from click.testing import CliRunner
 
 CHANGE_MARKER = "<!-- #changelog-release-automation-hook-do-not-remove -->"
 
