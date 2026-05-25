@@ -1,0 +1,5 @@
+description: Add chug validate subcommand for CI changelog enforcement
+category: feature
+authors:
+- name: Cody Rayment
+  github: crayment

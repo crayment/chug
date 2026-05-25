@@ -1,0 +1,6 @@
+description: Replace chug-validate and chug-release composite actions with root setup
+  action
+category: feature
+authors:
+- name: Cody Rayment
+  github: crayment
