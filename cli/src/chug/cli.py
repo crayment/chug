@@ -5,12 +5,32 @@ from pathlib import Path
 
 import click
 
+from . import __commit__, __version__
 from .change import create_change_file
 from .config import DEFAULT_CHANGE_MARKER, DEFAULT_CHANGELOG_FILE, changes_dir, load_config, write_default_config
 from .release import apply_release, preview_markdown
 
 
-@click.group()
+def get_version_output(prog_name: str = "chug") -> str:
+    return f"{prog_name}, version {__version__} ({__commit__})"
+
+
+def show_version(ctx: click.Context, param: click.Option, value: bool) -> None:
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(get_version_output(ctx.command_path))
+    ctx.exit()
+
+
+@click.group(name="chug")
+@click.option(
+    "--version",
+    is_flag=True,
+    is_eager=True,
+    expose_value=False,
+    callback=show_version,
+    help="Show the installed Chug version and commit.",
+)
 def cli() -> None:
     """Manage a team changelog through small change files."""
 
