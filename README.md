@@ -181,13 +181,6 @@ Chug finds the most recent base-branch commit that touched the change file, look
 
 Two companion actions for teams that want changelog hygiene enforced in CI.
 
-**Working examples:**
-
-- [Validation workflow in `crayment/chug-testing`](https://github.com/crayment/chug-testing/blob/main/.github/workflows/validate-changelog.yml)
-- [Release workflow in `crayment/chug-testing`](https://github.com/crayment/chug-testing/blob/main/.github/workflows/release-changelog.yml)
-
-This repo uses local-path action references in its own workflows so changes to the actions can be tested on the same PR that modifies them. Consumer repos should reference the published action path by tag.
-
 ### `chug-validate`
 
 Fails a pull request if no file in `changes/` was added or modified. Use this to make a changelog entry a required part of every PR.
