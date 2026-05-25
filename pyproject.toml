@@ -45,7 +45,15 @@ packages = ["cli/src/chug"]
 [tool.pytest.ini_options]
 testpaths = ["cli/tests"]
 
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
 [dependency-groups]
 dev = [
   "pytest>=8.0",
+  "ruff>=0.11.0",
 ]
