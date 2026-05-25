@@ -238,11 +238,17 @@ jobs:
       - run: chug release --version ${{ inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push changelog commit
-        run: git push
+      - name: Commit and push changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git add -A changes/ || true
+          git diff --cached --quiet || git commit -m "Update changelog for ${{ inputs.version }}"
+          git push
 ```
 
-If you only want to push when files actually changed, check `git status --porcelain` before the push step.
+Push is left to the calling workflow intentionally — whether it succeeds depends on your branch protection rules and token permissions.
 
 ### Setup action inputs
 
