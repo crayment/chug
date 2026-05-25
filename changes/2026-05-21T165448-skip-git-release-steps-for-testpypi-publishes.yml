@@ -1,5 +1,0 @@
-description: Skip git release steps for TestPyPI publishes
-category: bug
-authors:
-- name: Cody Rayment
-  github: crayment
