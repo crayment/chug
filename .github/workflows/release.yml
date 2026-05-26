@@ -122,6 +122,18 @@ jobs:
         run: |
           uv publish dist/*
 
+      - name: Publish to Hex.pm
+        if: env.PUBLISH_TARGET == 'pypi'
+        working-directory: elixir
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+        shell: bash
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+          mix hex.publish --yes
+
       - name: Push release commit
         if: env.PUBLISH_TARGET == 'pypi'
         shell: bash
