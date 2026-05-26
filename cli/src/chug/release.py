@@ -98,7 +98,8 @@ def _format_stories(stories: list[str], config: dict) -> list[str]:
     for story in stories:
         parsed = urlparse(story)
         if parsed.scheme in ("http", "https") and parsed.netloc:
-            result.append(f"[{parsed.path}]({story})")
+            label = parsed.path if parsed.path and parsed.path != "/" else parsed.netloc
+            result.append(f"[{label}]({story})")
         elif template:
             result.append(f"[{story}]({template.format(id=story)})")
         else:

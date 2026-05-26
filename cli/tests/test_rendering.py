@@ -82,6 +82,23 @@ def test_preview_renders_url_story_ignoring_story_link_template(tmp_path: Path, 
     assert "[/issues/123](https://mytracker.io/issues/123)" in rendered
 
 
+def test_preview_renders_url_story_with_no_path_using_netloc_as_label(tmp_path: Path, monkeypatch) -> None:
+    """A URL with no path (e.g. https://example.com) falls back to netloc as the link label."""
+    monkeypatch.chdir(tmp_path)
+    changes_dir().mkdir(exist_ok=True)
+
+    entry = {
+        "description": "Fix session timeout on mobile",
+        "category": "bug",
+        "stories": ["https://example.com"],
+    }
+    (changes_dir() / "2026-05-26T100003-fix.yml").write_text(yaml.safe_dump(entry, sort_keys=False))
+
+    rendered = preview_markdown(DEFAULT_CONFIG)
+
+    assert "[example.com](https://example.com)" in rendered
+
+
 def test_release_with_no_changes_writes_no_changes_section(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
 
