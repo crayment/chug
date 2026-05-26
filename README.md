@@ -42,13 +42,21 @@ That's it. Chug is deliberately small. It's not a release platform or a versioni
 
 ## Quick Start
 
-**Install:**
+**Install (Python):**
 
 ```bash
 uv tool install chug-cli
 # or
 pipx install chug-cli
 ```
+
+**Install (Elixir):** If you're in an Elixir project and prefer Mix over the Python CLI, add `chug` to your `mix.exs` dev dependencies instead:
+
+```elixir
+{:chug, "~> 0.1", only: :dev, runtime: false}
+```
+
+Then use `mix chug.new` wherever the docs say `chug new`. Everything else — CI validation, releases — uses the GitHub Action and is language-agnostic.
 
 **Bootstrap a repo:**
 

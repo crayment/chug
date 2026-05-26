@@ -64,3 +64,24 @@ jobs:
         shell: bash
         run: |
           uv run --group dev ruff check cli
+
+  elixir:
+    name: Elixir
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18"
+          otp-version: "27"
+
+      - name: Install dependencies
+        working-directory: elixir
+        run: mix deps.get
+
+      - name: Run tests
+        working-directory: elixir
+        run: mix test
