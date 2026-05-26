@@ -45,13 +45,7 @@ Valid categories are in `chug.config.yml`. Do not edit `CHANGELOG.md` directly.
 
 ## Before cutting a release
 
-Run the full integration test suite against `main` using the `crayment/chug-testing` repo. The skill is at:
-
-```
-/Users/crayment/dev/me/chug-testing/.agents/skills/chug-testing-integration/SKILL.md
-```
-
-Read it, follow both step files (`steps-pr-and-merge.md` then `steps-release.md`), and report results. Only trigger the release workflow once all steps pass.
+Run the full integration test suite against `main` using the `crayment/chug-testing` repo. The skill lives at `.agents/skills/chug-testing-integration/SKILL.md` in that repo. Find or clone it locally, then read the skill and follow both step files (`steps-pr-and-merge.md` then `steps-release.md`) in order. Report results before triggering the release workflow.
 
 ## Cutting a release
 
