@@ -156,7 +156,11 @@ defmodule Mix.Tasks.Chug.New do
   end
 
   defp yaml_string(value) do
-    escaped = String.replace(value, "\"", "\\\"")
+    escaped =
+      value
+      |> String.replace("\\", "\\\\")
+      |> String.replace("\"", "\\\"")
+
     "\"#{escaped}\""
   end
 

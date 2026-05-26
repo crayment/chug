@@ -77,6 +77,17 @@ defmodule Mix.Tasks.Chug.NewTest do
     end
   end
 
+  test "description with backslashes round-trips correctly", %{tmp: tmp} do
+    write_config(tmp)
+    run_in(tmp, ["--description", "C:\\new\\path", "--category", "bug"])
+
+    [file] = change_files(tmp)
+    content = File.read!(file)
+    Application.ensure_all_started(:yaml_elixir)
+    assert {:ok, parsed} = YamlElixir.read_from_string(content)
+    assert parsed["description"] == "C:\\new\\path"
+  end
+
   test "filename is timestamped and slugified from description", %{tmp: tmp} do
     write_config(tmp)
     run_in(tmp, ["--description", "Add export endpoint", "--category", "feature"])
