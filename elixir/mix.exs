@@ -41,6 +41,7 @@ defmodule Chug.MixProject do
   defp deps do
     [
       {:yaml_elixir, "~> 2.9"},
+      {:ymlr, "~> 5.0"},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end

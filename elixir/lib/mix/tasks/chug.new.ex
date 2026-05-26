@@ -88,23 +88,16 @@ defmodule Mix.Tasks.Chug.New do
   end
 
   defp build_entry(description, category, stories) do
-    authors = detect_authors()
+    doc =
+      %{"description" => description, "category" => category}
+      |> maybe_put("stories", stories)
+      |> Map.put("authors", detect_authors())
 
-    lines = [
-      "description: #{yaml_string(description)}",
-      "category: #{yaml_string(category)}"
-    ]
-
-    lines =
-      if stories != [] do
-        stories_yaml = Enum.map_join(stories, "", &"- #{&1}\n")
-        lines ++ ["stories:\n#{indent(stories_yaml)}"]
-      else
-        lines
-      end
-
-    Enum.join(lines, "\n") <> "\n" <> authors_yaml(authors)
+    Ymlr.document!(doc)
   end
+
+  defp maybe_put(map, _key, []), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp detect_authors do
     name = git_config("user.name")
@@ -131,46 +124,6 @@ defmodule Mix.Tasks.Chug.New do
       _ ->
         nil
     end
-  end
-
-  defp authors_yaml([]), do: "authors: []\n"
-
-  defp authors_yaml(authors) do
-    entries =
-      Enum.map_join(authors, "", fn author ->
-        first_line =
-          cond do
-            author["name"] -> "- name: #{yaml_string(author["name"])}"
-            author["github"] -> "- github: #{yaml_string(author["github"])}"
-          end
-
-        extra_lines =
-          [author["github"] && author["name"] && "  github: #{yaml_string(author["github"])}"]
-          |> Enum.reject(&is_nil/1)
-
-        ([first_line] ++ extra_lines ++ [""])
-        |> Enum.join("\n")
-      end)
-
-    "authors:\n#{entries}"
-  end
-
-  defp yaml_string(value) do
-    escaped =
-      value
-      |> String.replace("\\", "\\\\")
-      |> String.replace("\"", "\\\"")
-
-    "\"#{escaped}\""
-  end
-
-  defp indent(str) do
-    str
-    |> String.split("\n")
-    |> Enum.map_join("\n", fn
-      "" -> ""
-      line -> "  " <> line
-    end)
   end
 
   defp error_exit(message) do

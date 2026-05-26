@@ -56,9 +56,10 @@ defmodule Mix.Tasks.Chug.NewTest do
     files = change_files(tmp)
     assert length(files) == 1
 
-    content = File.read!(hd(files))
-    assert content =~ ~s(description: "Fix session timeout")
-    assert content =~ ~s(category: "bug")
+    Application.ensure_all_started(:yaml_elixir)
+    {:ok, parsed} = File.read!(hd(files)) |> YamlElixir.read_from_string()
+    assert parsed["description"] == "Fix session timeout"
+    assert parsed["category"] == "bug"
   end
 
   test "description with special YAML characters produces valid parseable output", %{tmp: tmp} do
@@ -159,16 +160,17 @@ defmodule Mix.Tasks.Chug.NewTest do
     assert content =~ "authors:"
   end
 
-  test "authors with special characters are quoted and produce valid YAML", %{tmp: tmp} do
+  test "output is valid YAML parseable back to the original values", %{tmp: tmp} do
     write_config(tmp)
-    run_in(tmp, ["--description", "Test change", "--category", "chore"])
+    run_in(tmp, ["--description", "Test change", "--category", "chore", "--stories", "sc-999"])
 
-    # Simulate what the file would look like with a tricky author name by
-    # directly verifying the yaml_string quoting via a round-trip
-    tricky_yaml = ~s(description: "fix"\ncategory: "bug"\nauthors:\n- name: "Doe, John"\n  github: "johndoe"\n)
+    [file] = change_files(tmp)
     Application.ensure_all_started(:yaml_elixir)
-    assert {:ok, parsed} = YamlElixir.read_from_string(tricky_yaml)
-    assert [%{"name" => "Doe, John", "github" => "johndoe"}] = parsed["authors"]
+    assert {:ok, parsed} = YamlElixir.read_from_string(File.read!(file))
+    assert parsed["description"] == "Test change"
+    assert parsed["category"] == "chore"
+    assert parsed["stories"] == ["sc-999"]
+    assert Map.has_key?(parsed, "authors")
   end
 
   test "creates changes/ directory if it does not exist", %{tmp: tmp} do
