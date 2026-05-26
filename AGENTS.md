@@ -32,8 +32,6 @@ uv run --group dev ruff check cli
 uv run --group dev ruff format --check cli
 ```
 
-Follow TDD: write a failing test first, confirm it fails, then implement.
-
 ## Making changes
 
 Every PR requires a change file. Create one with:
@@ -45,7 +43,7 @@ Valid categories are in `chug.config.yml`. Do not edit `CHANGELOG.md` directly.
 
 ## Before cutting a release
 
-Run the full integration test suite against `main` using the `crayment/chug-testing` repo. The skill lives at `.agents/skills/chug-testing-integration/SKILL.md` in that repo. Find or clone it locally, then read the skill and follow both step files (`steps-pr-and-merge.md` then `steps-release.md`) in order. Report results before triggering the release workflow.
+Run the full integration test suite against `main` using the `crayment/chug-testing` repo. The skill lives at `.agents/skills/chug-testing-integration/SKILL.md` in that repo. Spawn a child agent to run it — have the child find or clone `crayment/chug-testing` locally, load the skill, and follow both step files (`steps-pr-and-merge.md` then `steps-release.md`) in order. Wait for the child to report results before triggering the release workflow.
 
 ## Cutting a release
 
