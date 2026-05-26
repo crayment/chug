@@ -28,6 +28,60 @@ def test_preview_renders_story_links_and_author_links(tmp_path: Path, monkeypatc
     assert "[Jane Doe](https://github.com/janedoe)" in rendered
 
 
+def test_preview_renders_full_url_story_as_link_with_path_label(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    changes_dir().mkdir(exist_ok=True)
+
+    entry = {
+        "description": "Fix session timeout on mobile",
+        "category": "bug",
+        "stories": ["https://linear.app/myteam/issue/OPS-79/fix-session-timeout"],
+    }
+    (changes_dir() / "2026-05-26T100000-fix.yml").write_text(yaml.safe_dump(entry, sort_keys=False))
+
+    rendered = preview_markdown(DEFAULT_CONFIG)
+
+    expected = "[/myteam/issue/OPS-79/fix-session-timeout](https://linear.app/myteam/issue/OPS-79/fix-session-timeout)"
+    assert expected in rendered
+
+
+def test_preview_renders_full_url_story_without_path_as_bare_link(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    changes_dir().mkdir(exist_ok=True)
+
+    entry = {
+        "description": "Fix session timeout on mobile",
+        "category": "bug",
+        "stories": ["https://example.com/PROJ-42"],
+    }
+    (changes_dir() / "2026-05-26T100001-fix.yml").write_text(yaml.safe_dump(entry, sort_keys=False))
+
+    rendered = preview_markdown(DEFAULT_CONFIG)
+
+    assert "[/PROJ-42](https://example.com/PROJ-42)" in rendered
+
+
+def test_preview_renders_url_story_ignoring_story_link_template(tmp_path: Path, monkeypatch) -> None:
+    """A full URL story bypasses the story_link_template entirely."""
+    monkeypatch.chdir(tmp_path)
+    changes_dir().mkdir(exist_ok=True)
+
+    entry = {
+        "description": "Fix session timeout on mobile",
+        "category": "bug",
+        "stories": ["https://mytracker.io/issues/123"],
+    }
+    (changes_dir() / "2026-05-26T100002-fix.yml").write_text(yaml.safe_dump(entry, sort_keys=False))
+
+    config = {**DEFAULT_CONFIG, "story_link_template": "https://example.com/stories/{id}"}
+    rendered = preview_markdown(config)
+
+    # Should NOT have the template applied to the URL
+    assert "https://example.com/stories/https" not in rendered
+    # Should use the URL directly
+    assert "[/issues/123](https://mytracker.io/issues/123)" in rendered
+
+
 def test_release_with_no_changes_writes_no_changes_section(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
 

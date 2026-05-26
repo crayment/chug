@@ -8,6 +8,7 @@ import os
 import subprocess
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
@@ -93,9 +94,16 @@ def _format_stories(stories: list[str], config: dict) -> list[str]:
     template = config.get("story_link_template")
     if not stories:
         return []
-    if not template:
-        return stories
-    return [f"[{story}]({template.format(id=story)})" for story in stories]
+    result = []
+    for story in stories:
+        parsed = urlparse(story)
+        if parsed.scheme in ("http", "https") and parsed.netloc:
+            result.append(f"[{parsed.path}]({story})")
+        elif template:
+            result.append(f"[{story}]({template.format(id=story)})")
+        else:
+            result.append(story)
+    return result
 
 
 def _format_authors(authors: list[dict]) -> list[str]:
