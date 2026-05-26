@@ -11,7 +11,7 @@ defmodule Chug.MixProject do
     [
       app: :chug,
       version: @version,
-      elixir: "~> 1.14",
+      elixir: "~> 1.19",
       description: description(),
       package: package(),
       deps: deps(),
