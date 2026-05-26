@@ -39,7 +39,6 @@ Read `chug.config.yml` first.
 Pay attention to:
 
 - `categories` — use only configured categories
-- `story_format`
 - `story_link_template`
 - `changelog_style` if present — follow it when writing descriptions
 
