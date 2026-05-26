@@ -138,7 +138,6 @@ categories:
   - feature
   - chore
   - bug
-story_format: "{id}"
 story_link_template: "https://your-tracker.com/stories/{id}"
 git_base_branch: main
 ```

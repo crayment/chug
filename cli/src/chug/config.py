@@ -12,7 +12,6 @@ DEFAULT_CONFIG = {
     "categories": ["feature", "chore", "bug"],
     "changelog_file": DEFAULT_CHANGELOG_FILE,
     "change_marker": DEFAULT_CHANGE_MARKER,
-    "story_format": "{id}",
     "story_link_template": "https://example.com/stories/{id}",
     "git_base_branch": "main",
 }
