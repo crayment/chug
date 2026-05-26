@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 <!-- #changelog-release-automation-hook-do-not-remove -->
 
+## [0.1.3] - 2026-05-26
+
+### Feature
+- Add mix chug.new task as Elixir/Hex package ([#7](https://github.com/crayment/chug/pull/7), [Cody Rayment](https://github.com/crayment))
+
+### Chore
+- Add AGENTS.md with development and release guidance for agents ([#6](https://github.com/crayment/chug/pull/6), [Cody Rayment](https://github.com/crayment))
+- Publish Elixir package to Hex.pm as part of release workflow ([#9](https://github.com/crayment/chug/pull/9), [Cody Rayment](https://github.com/crayment))
+
+
 ## [0.1.2] - 2026-05-25
 
 ### Feature

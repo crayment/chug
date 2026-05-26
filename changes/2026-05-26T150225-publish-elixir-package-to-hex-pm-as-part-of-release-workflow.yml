@@ -1,5 +1,0 @@
-description: Publish Elixir package to Hex.pm as part of release workflow
-category: chore
-authors:
-- name: Cody Rayment
-  github: crayment
