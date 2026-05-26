@@ -4,6 +4,5 @@ categories:
 - bug
 changelog_file: CHANGELOG.md
 change_marker: '<!-- #changelog-release-automation-hook-do-not-remove -->'
-story_format: '{id}'
 story_link_template: https://example.com/stories/{id}
 git_base_branch: main
