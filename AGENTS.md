@@ -6,13 +6,14 @@ Guidance for agents working in this repository.
 
 Chug is a changelog management tool. Instead of editing `CHANGELOG.md` directly, contributors write small YAML files into a `changes/` directory. At release time, `chug release` rolls them into a versioned section in `CHANGELOG.md` and deletes the processed files.
 
-Chug ships two things: a CLI (`chug-cli` on PyPI) and a GitHub Action (`uses: crayment/chug@v1`) that installs the CLI in CI.
+Chug ships three things: a CLI (`chug-cli` on PyPI), a GitHub Action (`uses: crayment/chug@v1`) that installs the CLI in CI, and an Elixir package (`chug` on Hex.pm) that provides `mix chug.new` for Elixir projects.
 
 ## Repo structure
 
 ```
-cli/src/chug/      CLI source code
-cli/tests/         Unit tests
+cli/src/chug/      Python CLI source code
+cli/tests/         Python unit tests
+elixir/            Elixir/Hex package (mix chug.new task)
 action.yml         Root GitHub Action (public surface: uses: crayment/chug@v1)
 .github/workflows/ CI, release, and changelog validation workflows
 changes/           Pending changelog entries (YAML files)
@@ -21,15 +22,16 @@ chug.config.yml    Chug configuration for this repo
 
 ## Development
 
-Run tests:
+Python tests:
 ```bash
 uv run --group dev pytest
-```
-
-Lint and format:
-```bash
 uv run --group dev ruff check cli
 uv run --group dev ruff format --check cli
+```
+
+Elixir tests:
+```bash
+cd elixir && mix deps.get && mix test
 ```
 
 ## Making changes

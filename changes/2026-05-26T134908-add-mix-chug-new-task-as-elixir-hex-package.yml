@@ -1,0 +1,5 @@
+description: Add mix chug.new task as Elixir/Hex package
+category: feature
+authors:
+- name: Cody Rayment
+  github: crayment
