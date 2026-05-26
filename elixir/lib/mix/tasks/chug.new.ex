@@ -91,8 +91,8 @@ defmodule Mix.Tasks.Chug.New do
     authors = detect_authors()
 
     lines = [
-      "description: #{description}",
-      "category: #{category}"
+      "description: #{yaml_string(description)}",
+      "category: #{yaml_string(category)}"
     ]
 
     lines =
@@ -103,15 +103,7 @@ defmodule Mix.Tasks.Chug.New do
         lines
       end
 
-    authors_yaml =
-      if authors == [] do
-        "authors: []\n"
-      else
-        entries = Enum.map_join(authors, "", fn a -> "- #{format_author(a)}\n" end)
-        "authors:\n#{indent(entries)}"
-      end
-
-    Enum.join(lines, "\n") <> "\n" <> authors_yaml
+    Enum.join(lines, "\n") <> "\n" <> authors_yaml(authors)
   end
 
   defp detect_authors do
@@ -141,9 +133,32 @@ defmodule Mix.Tasks.Chug.New do
     end
   end
 
-  defp format_author(%{"name" => name, "github" => github}), do: "{name: #{name}, github: #{github}}"
-  defp format_author(%{"name" => name}), do: "{name: #{name}}"
-  defp format_author(%{"github" => github}), do: "{github: #{github}}"
+  defp authors_yaml([]), do: "authors: []\n"
+
+  defp authors_yaml(authors) do
+    entries =
+      Enum.map_join(authors, "", fn author ->
+        first_line =
+          cond do
+            author["name"] -> "- name: #{yaml_string(author["name"])}"
+            author["github"] -> "- github: #{yaml_string(author["github"])}"
+          end
+
+        extra_lines =
+          [author["github"] && author["name"] && "  github: #{yaml_string(author["github"])}"]
+          |> Enum.reject(&is_nil/1)
+
+        ([first_line] ++ extra_lines ++ [""])
+        |> Enum.join("\n")
+      end)
+
+    "authors:\n#{entries}"
+  end
+
+  defp yaml_string(value) do
+    escaped = String.replace(value, "\"", "\\\"")
+    "\"#{escaped}\""
+  end
 
   defp indent(str) do
     str
