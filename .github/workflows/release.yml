@@ -156,4 +156,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          gh release create "${VERSION}" --title "${VERSION}" --generate-notes
+          NOTES=$(awk -v version="$VERSION" 'index($0, "## [" version "]") == 1 {found=1; next} found && /^## \[/{exit} found{print}' CHANGELOG.md)
+          gh release create "${VERSION}" --title "${VERSION}" --notes "$NOTES" --generate-notes
