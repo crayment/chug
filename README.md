@@ -211,7 +211,7 @@ jobs:
 
 ### Release workflow
 
-`chug release` writes the versioned changelog section and deletes the processed change files. Committing and pushing is left to the workflow.
+`chug release` writes the versioned changelog section and deletes the processed change files. The full pattern includes committing the changelog, pushing, and creating a GitHub release with the changelog content prefixed with a `## Release Notes` header — which visually anchors it above GitHub's auto-generated `## What's Changed` section.
 
 ```yaml
 name: Update Changelog
@@ -245,6 +245,17 @@ jobs:
           git add -A changes/ || true
           git diff --cached --quiet || git commit -m "Update changelog for ${{ inputs.version }}"
           git push
+      - name: Create GitHub release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          NOTES=$(awk -v version="$VERSION" 'index($0, "## [" version "]") == 1 {found=1; next} found && /^## \[/{exit} found{print}' CHANGELOG.md)
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes "## Release Notes"$'\n\n'"$NOTES" \
+            --generate-notes
 ```
 
 Push is left to the calling workflow intentionally — whether it succeeds depends on your branch protection rules and token permissions.

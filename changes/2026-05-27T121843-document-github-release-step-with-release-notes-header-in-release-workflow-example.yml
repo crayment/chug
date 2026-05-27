@@ -1,0 +1,6 @@
+description: Document GitHub release step with Release Notes header in release workflow
+  example
+category: chore
+authors:
+- name: Cody Rayment
+  github: crayment
