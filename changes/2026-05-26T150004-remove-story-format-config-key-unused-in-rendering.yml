@@ -1,5 +1,0 @@
-description: Remove story_format config key (unused in rendering)
-category: chore
-authors:
-- name: Cody Rayment
-  github: crayment

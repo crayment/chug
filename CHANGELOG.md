@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 <!-- #changelog-release-automation-hook-do-not-remove -->
 
+## [0.1.4] - 2026-05-27
+
+### Feature
+- Support full URLs as story references, rendered as path-labelled markdown links ([#10](https://github.com/crayment/chug/pull/10), [Cody Rayment](https://github.com/crayment))
+
+### Chore
+- Remove story_format config key (unused in rendering) ([#8](https://github.com/crayment/chug/pull/8), [Cody Rayment](https://github.com/crayment))
+- Include chug changelog content in GitHub release notes alongside auto-generated What's Changed ([#11](https://github.com/crayment/chug/pull/11), [Cody Rayment](https://github.com/crayment))
+
+
 ## [0.1.3] - 2026-05-26
 
 ### Feature

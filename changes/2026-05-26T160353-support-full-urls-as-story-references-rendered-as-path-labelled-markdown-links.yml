@@ -1,6 +1,0 @@
-description: Support full URLs as story references, rendered as path-labelled markdown
-  links
-category: feature
-authors:
-- name: Cody Rayment
-  github: crayment
