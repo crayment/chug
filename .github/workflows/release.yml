@@ -68,6 +68,17 @@ jobs:
         with:
           source: repo
 
+      - name: Capture release notes
+        id: release_notes
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NOTES=$(chug preview)
+          echo "notes<<CHUG_RELEASE_NOTES_EOF" >> "$GITHUB_OUTPUT"
+          echo "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "CHUG_RELEASE_NOTES_EOF" >> "$GITHUB_OUTPUT"
+
       - name: Run chug release
         shell: bash
         env:
@@ -154,7 +165,7 @@ jobs:
         if: env.PUBLISH_TARGET == 'pypi'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NOTES: ${{ steps.release_notes.outputs.notes }}
         shell: bash
         run: |
-          NOTES=$(awk -v version="$VERSION" 'index($0, "## [" version "]") == 1 {found=1; next} found && /^## \[/{exit} found{print}' CHANGELOG.md)
-          gh release create "${VERSION}" --title "${VERSION}" --notes "$NOTES" --generate-notes
+          gh release create "${VERSION}" --title "${VERSION}" --notes "## Release Notes"$'\n\n'"$RELEASE_NOTES" --generate-notes
