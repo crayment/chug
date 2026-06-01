@@ -71,6 +71,8 @@ jobs:
       - name: Capture release notes
         id: release_notes
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NOTES=$(chug preview)
           echo "notes<<CHUG_RELEASE_NOTES_EOF" >> "$GITHUB_OUTPUT"
